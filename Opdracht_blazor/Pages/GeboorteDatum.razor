@@ -1,0 +1,61 @@
+﻿@page "/geboortedatum"
+
+@using Blazor.Extensions.Storage
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <form name="frmLeeftijd">
+                <div class="row ">
+                    <div class="col-auto mb-3">
+                        <label for="geboortedatum">Je geboortedatum</label>
+                        <input type="date" id="geboortedatum" min="1970-01-01" @bind="birthdate" />
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-auto mb-3">
+                        <button class="btn btn-primary btn-lg mb-2" id="check" @onclick="CheckFunFacts">Check FunFacts</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    
+
+ 
+    private DateTime birthdate;
+    private bool funFactsChecked = false;
+
+    [Inject]
+    private ILocalStorage LocalStorage { get; set; }
+
+    private async Task CheckFunFacts()
+    {
+        // You can access the selected birthdate using 'birthdate'
+        // For example, you can store it in a variable or perform other actions here
+        var selectedBirthdate = birthdate;
+
+        // Set a flag to indicate that fun facts have been checked
+        funFactsChecked = true;
+
+        // Store the selectedBirthdate in localStorage
+        await LocalStorage.SetItemAsync("selectedBirthdate", selectedBirthdate.ToString("yyyy-MM-dd"));
+
+        // Redirect to another page with the selected birthdate (if needed)
+        if (funFactsChecked)
+        {
+            var selectedDateAsString = selectedBirthdate.ToString("yyyy-MM-dd");
+            var url = $"/funfacts";
+            NavigationManager.NavigateTo(url);
+        }
+    }
+
+    // Inject NavigationManager to handle navigation
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}

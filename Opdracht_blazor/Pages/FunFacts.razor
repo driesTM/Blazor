@@ -1,0 +1,38 @@
+﻿@page "/funfacts"
+
+@using System
+@using Microsoft.JSInterop
+
+<h3>Opdracht geboortedatum FunFacts</h3>
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<p id="result">@result</p>
+
+			<button class="btn btn-primary btn-lg mb-2" @onclick="GoBack">Opnieuw</button>
+		</div>
+	</div>
+</div>
+
+@code {
+    
+      
+     private string result = "";
+
+    
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/geboortedatum");
+    }
+    
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    
+
+
+
+
+}

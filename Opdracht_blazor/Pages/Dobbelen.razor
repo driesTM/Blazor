@@ -1,0 +1,104 @@
+﻿@page "/dobbelen"
+
+@inject IJSRuntime JsRuntime
+
+<h1>12grid dobbelen</h1>
+
+<div class="container mt-4">
+    <div class="row">
+        @foreach (var speler in spelers)
+        {
+            <div class="col-md-3 mb-3">
+                <div class="@speler.BackgroundClass" id="@speler.Id">
+                    <div class="card-body">
+                        <h5 class="card-title">@speler.Naam</h5>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-6 align-self-center text-center">
+            <div class="alert alert-info" id="result" role="alert">@resultaat</div>
+        </div>
+    </div>
+
+    <div>
+        <label for="guessInput">Hoeveel spelers denk je dat er een 6 gaan gooien? (1-12):</label>
+        <input id="guessInput" @bind="antwoord" type="number" min="1" max="12" />
+        
+    </div>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-3 text-center">
+            <button @onclick="Speel" class="btn btn-primary">PLAY</button>
+        </div>
+        <div class="col-3 text-center">
+            <button @onclick="Reset" class="btn btn-danger">RESET</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Speler> spelers;
+    private string resultaat = "";
+    private int antwoord = 0;
+
+    protected override void OnInitialized()
+    {
+        spelers = new List<Speler>();
+        for (int i = 1; i <= 12; i++)
+        {
+            spelers.Add(new Speler { Id = $"speler{i}", Naam = $"speler {i}", BackgroundClass = "card text-white bg-secondary" });
+        }
+    }
+
+    private void Reset()
+    {
+        foreach (var speler in spelers)
+        {
+            speler.BackgroundClass = "card text-white bg-secondary";
+        }
+        resultaat = "";
+    }
+
+    private async Task Speel()
+    {
+        Reset();
+        
+        int count = 0;
+
+        foreach (var speler in spelers)
+        {
+            int dobbelsteen = RandomIntFromInterval(1, 6);
+            if (dobbelsteen == 6)
+            {
+                speler.BackgroundClass = "card text-white bg-success";
+                count++;
+            }
+        }
+
+        resultaat = $"{count} speler(s) gooide een 6.";
+        if (antwoord == count)
+        {
+            resultaat += " Gewonnen. Juist geraden!";
+        }
+        else
+        {
+            resultaat += $" Oeps. {count} speler(s) gooiden een zes. Probeer nog eens...";
+        }
+    }
+
+    private int RandomIntFromInterval(int min, int max)
+    {
+        return new Random().Next(min, max + 1);
+    }
+
+    public class Speler
+    {
+        public string Id { get; set; }
+        public string Naam { get; set; }
+        public string BackgroundClass { get; set; }
+    }
+}

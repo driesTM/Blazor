@@ -1,0 +1,108 @@
+﻿@page "/movies"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+
+<h1>Films zoeken (OMDB API)</h1>
+<form class="form-inline" @onsubmit="SearchMovies">
+    <div class="form-group m-2">
+        <label for="zoekterm">Zoekterm</label>
+        <input type="text" class="form-control mx-2" @bind="searchTerm" />
+    </div>
+    <button type="submit" class="btn btn-primary m-2">Zoeken</button>
+</form>
+
+<div class="row m-2">
+    <div class="col-md-12">
+        <div class="row p-2 " id="divMsg" >@message</div>
+        <div class="row p-3" id="divResult">
+            @foreach (var movie in movies)
+            {
+                <div class="col-md-4 col-sm-6">
+                    <div class="card mb-3 shadow-sm">
+                        <img src="@movie.Poster" class="img-responsive" />
+                        <div class="card-body">
+                            <p class="card-text">@movie.Title</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">@movie.Year</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string searchTerm = "";
+    private string message = "";
+    private string messageClass = "alert-success";
+    private List<Movie> movies = new List<Movie>();
+
+    private class Movie
+    {
+        public string Title { get; set; }
+        public string Year { get; set; }
+        public string Poster { get; set; }
+    }
+
+    private async Task SearchMovies()
+    {
+        if (ValidateSearch())
+        {
+            var myAPIkey = "5a95c878"; // Your API key
+            var search = searchTerm.Replace(" ", "+");
+
+            try
+            {
+                var httpClient = new HttpClient();
+                var moviesResult = await httpClient.GetFromJsonAsync<MovieSearchResult>($"https://www.omdbapi.com/?s={search}&type=movie&apikey={myAPIkey}");
+                
+                
+                
+
+                if (moviesResult?.Response == "True")
+                {
+                    message = $"Aantal gevonden: {moviesResult.totalResults}";
+                    messageClass = "alert-success";
+                    movies = moviesResult.Search;
+                }
+                else
+                {
+                    message = moviesResult?.Error ?? "An error occurred.";
+                    messageClass = "alert-danger";
+                    movies.Clear();
+                }
+            }
+            catch (HttpRequestException)
+            {
+                message = "Request failed";
+                messageClass = "alert-danger";
+                movies.Clear();
+            }
+        }
+    }
+
+    
+
+    private bool ValidateSearch()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2 || searchTerm.Length > 15)
+        {
+            message = "Deze zoekopdracht is te kort (2-15 tekens toegelaten).";
+            messageClass = "alert-danger";
+            return false;
+        }
+
+        return true;
+    }
+
+    private class MovieSearchResult
+    {
+        public string Response { get; set; }
+        public string Error { get; set; }
+        public int totalResults { get; set; }
+        public List<Movie> Search { get; set; }
+    }
+}
